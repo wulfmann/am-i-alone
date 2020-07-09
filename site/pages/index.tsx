@@ -1,7 +1,7 @@
-import { useAlone } from 'am-i-alone';
+// import { useAlone } from 'am-i-alone';
 
 function Home() {
-  const { alone, count } = useAlone();
+  const { alone, count } = { alone: false, count: 1 };
   
   const verb = count === 1 ? 'is' : 'are';
   const suffix = count === 1 ? '' : 's';
