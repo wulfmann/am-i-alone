@@ -1,0 +1,17 @@
+{
+  "name": "am-i-alone",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "latest"
+  },
+  "files": [
+    "lib"
+  ]
+}
