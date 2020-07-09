@@ -9,7 +9,8 @@
     "@aws-cdk/aws-apigatewayv2": "latest",
     "@aws-cdk/aws-lambda": "latest",
     "@aws-cdk/aws-dynamodb": "latest",
-    "@aws-cdk/aws-iam": "latest"
+    "@aws-cdk/aws-iam": "latest",
+    "@aws-cdk/aws-cloudfront": "latest"
   },
   "devDependencies": {
     "typescript": "latest",
