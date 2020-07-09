@@ -9,7 +9,7 @@ function Home() {
   return (
     <div>
       <div>{text}</div>
-      <div>{!alone && `There ${verb} ${count} other${suffix}}</div>
+      <div>{!alone && `There ${verb} ${count} other${suffix}`}</div>
     </div>
   );
 };
