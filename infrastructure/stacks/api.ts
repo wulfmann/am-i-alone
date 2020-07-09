@@ -1,7 +1,9 @@
 import * as cdk from '@aws-cdk/core';
 import * as ag from '@aws-cdk/aws-apigateway';
 import * as ag2 from '@aws-cdk/aws-apigatewayv2';
-import * as lambda from '@aws-cdk/aws-lmabda';
+import * as lambda from '@aws-cdk/aws-lambda';
+import * as dynamo from '@aws-cdk/aws-dynamodb';
+import * as iam from '@aws-cdk/aws-iam';
 
 export class ConnectionApi extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
