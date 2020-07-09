@@ -8,7 +8,7 @@ function Home() {
 
   return (
     <div>
-      <div>{alone ? 'yes' /: 'no'}</div>
+      <div>{alone ? 'yes' : 'no'}</div>
       <div>{!alone && `There ${verb} ${count} other${suffix}}</div>
     </div>
   );
