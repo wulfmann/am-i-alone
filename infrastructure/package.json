@@ -1,0 +1,16 @@
+{
+  "name": "am-i-alone",
+  "version": "0.0.1",
+  "author": "Joe Snell<joepsnell@gmail.com",
+  "dependencies": {
+    "aws-cdk": "latest",
+    "@aws-cdk/core": "latest",
+    "@aws-cdk/aws-apigateway": "latest",
+    "@aws-cdk/aws-apigatewayv2": "latest",
+    "@aws-cdk/aws-lambda": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "ts-node": "latest"
+  }
+}
