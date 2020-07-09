@@ -11,9 +11,20 @@ export class ConnectionApi extends cdk.Stack {
     
     const appName = 'am-i-alone';
     
+    // Database
+    const table = new Table(this, 'Table', {
+      tableName: appName
+    });
+    
     // Socket API
     const socketApi = new ag2.HttpApi(this, 'SocketApi', {
-      apiName: `${appName}-socket-api`
+      apiName: `${appName}-socket-api`,
+      createDefaultStage: false
+    });
+    
+    const connectionAuthorizerHandler = new lambda.Function(this, 'ConnectionAuthorizerFunction', {
+      code: lambda.Code.fromAsset('../handlers/connection-authorizer'),
+      handler: 'handler'
     });
     
     const connectionHandlerCode = lambda.Code.fromAsset('../handlers/connection');
