@@ -1,0 +1,4 @@
+{
+    "app": "yarn ts-node app.ts",
+    "requireApproval": "never"
+}
