@@ -1,12 +1,20 @@
 {
-  "name": "am-i-alone-site",
+  "name": "site",
   "scripts": {
-    "dev": "next"
+    "dev": "next",
+    "build": "next build && next export"
   },
   "dependencies": {
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest,
-    "am-i-alone": "latest"
+    "react-dom": "latest",
+    "am-i-alone": "latest",
+    "webfontloader": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "sass": "latest",
+    "@types/react": "latest",
+    "@types/node": "latest"
   }
 }
