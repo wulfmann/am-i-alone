@@ -9,8 +9,10 @@ function Home() {
   
   return (
     <div className="container">
-      <h1 className="title">{text}</h1>
-      <p className="text">{!alone && `There ${verb} ${count} other${suffix}`}</p>
+      <div>
+        <h1 className="title">{text}</h1>
+        <p className="text">{!alone && `There ${verb} ${count} other${suffix}`}</p>
+      </div>
     </div>
   );
 };
