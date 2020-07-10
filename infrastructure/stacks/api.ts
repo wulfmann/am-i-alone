@@ -47,6 +47,7 @@ export class ConnectionApi extends cdk.Stack {
         STAGE: stage
       }
     });
+    table.grantReadWrite(connectFn);
     
     const connectIntegration = new ag2.CfnIntegration(this, 'ConnectIntegration', {
       apiId: socketApi.ref,
@@ -71,6 +72,7 @@ export class ConnectionApi extends cdk.Stack {
         STAGE: stage
       }
     });
+    table.grantReadWrite(disconnectFn);
     
     const disconnectIntegration = new ag2.CfnIntegration(this, 'DisconnectIntegration', {
       apiId: socketApi.ref,
