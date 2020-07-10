@@ -1,0 +1,22 @@
+html,
+body {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'EB Garamond', serif;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+.title {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 4rem;
+}
+
+.text {
+  font-weight: 500;
+}
