@@ -2,6 +2,12 @@
   --foreground: #000000;
   --background: #ffffff;
   --accent-1: #f5f5f5;
+  
+  @media (prefers-dark-interface) { 
+    --foreground: #ffffff;
+    --background: #000000;
+    --accent-1: #050505;
+  }
 }
 
 html,
