@@ -1,3 +1,9 @@
+:root {
+  --foreground: #000000;
+  --background: #ffffff;
+  --accent-1: #f5f5f5;
+}
+
 html,
 body {
   width: 100%;
@@ -12,6 +18,11 @@ body {
 *:before,
 *:after {
   box-sizing: inherit;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 h1,
@@ -47,7 +58,7 @@ p {
 
 .action {
   border-radius: .5rem;
-  background-color: #f5f5f5;
+  background-color: var(--accent-1);
   cursor: pointer;
   padding: .125rem 1rem;
   display: inline-block;
