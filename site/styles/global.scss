@@ -45,6 +45,12 @@ p {
   margin-bottom: 4rem;
 }
 
-.action .emoji {
-  font-size: 2rem;
+.action {
+  display: flex;
+  align-items: center;
+
+  .emoji {
+    font-size: 2rem;
+    margin-left: .25rem;
+  }
 }
