@@ -8,7 +8,7 @@ function Home() {
   const text = alone ? 'yes' : 'no';
   
   return (
-    <div>
+    <div className="container">
       <div className="title">{text}</div>
       <div className="text">{!alone && `There ${verb} ${count} other${suffix}`}</div>
     </div>
