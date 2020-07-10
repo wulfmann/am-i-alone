@@ -5,16 +5,15 @@
     "build": "next build && next export"
   },
   "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "am-i-alone": "latest",
-    "webfontloader": "latest"
+    "am-i-alone": "^0.0.2",
+    "next": "^9.4.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
   "devDependencies": {
-    "typescript": "latest",
-    "sass": "latest",
-    "@types/react": "latest",
-    "@types/node": "latest"
+    "@types/node": "^14.0.22",
+    "@types/react": "^16.9.42",
+    "sass": "^1.26.10",
+    "typescript": "^3.9.6"
   }
 }
