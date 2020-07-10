@@ -32,15 +32,6 @@ export class ConnectionApi extends cdk.Stack {
     });
 
     const stage = 'prod';
-    
-    // const connectionAuthorizerHandler = new lambda.Function(this, 'ConnectionAuthorizerFunction', {
-    //   code: lambda.Code.fromAsset('../handlers/connection-authorizer'),
-    //   handler: 'handler',
-    //   runtime: lambda.Runtime.NODEJS_12_X,
-    //   environment: {
-    //     TABLE_NAME: table.tableName
-    //   }
-    // });
 
     const handlerDir = 'handlers';
     
