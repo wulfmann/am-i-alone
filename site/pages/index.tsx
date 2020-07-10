@@ -17,7 +17,7 @@ function Home() {
         </div>
         {!alone && (
           <div className="action">
-            <p className="text">say hi <span className="emoji">👋</span></p>
+            <p className="text">say<span className="emoji">👋</span>hi</p>
           </div>
         )}
       </div>
