@@ -16,7 +16,7 @@ function Home() {
           <p className="text">{!alone && `There ${verb} ${count} other${suffix}`}</p>
         </div>
         {!alone && (
-          <div className="action">say hi 👋</div>
+          <div className="action">say hi <span className="emoji">👋</span></div>
         )}
       </div>
     </div>
