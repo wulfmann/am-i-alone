@@ -42,9 +42,7 @@ export class ConnectionApi extends cdk.Stack {
       handler: 'index.connect',
       runtime: lambda.Runtime.NODEJS_12_X,
       environment: {
-        TABLE_NAME: table.tableName,
-        API_ID: socketApi.ref,
-        STAGE: stage
+        TABLE_NAME: table.tableName
       }
     });
     table.grantReadWrite(connectFn);
@@ -67,9 +65,7 @@ export class ConnectionApi extends cdk.Stack {
       handler: 'index.disconnect',
       runtime: lambda.Runtime.NODEJS_12_X,
       environment: {
-        TABLE_NAME: table.tableName,
-        API_ID: socketApi.ref,
-        STAGE: stage
+        TABLE_NAME: table.tableName
       }
     });
     table.grantReadWrite(disconnectFn);
@@ -85,6 +81,30 @@ export class ConnectionApi extends cdk.Stack {
       routeKey: '$disconnect',
       apiId: socketApi.ref,
       target: `integrations/${disconnectIntegration.ref}`
+    });
+    
+    // Wave
+    const waveFn = new lambda.Function(this, 'WaveFunction', {
+      code: connectionHandlerCode,
+      handler: 'index.wave',
+      runtime: lambda.Runtime.NODEJS_12_X,
+      environment: {
+        TABLE_NAME: table.tableName
+      }
+    });
+    table.grantReadWrite(waveFn);
+    
+    const waveIntegration = new ag2.CfnIntegration(this, 'WaveIntegration', {
+      apiId: socketApi.ref,
+      integrationType: 'AWS_PROXY',
+      integrationUri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${waveFn.functionArn}/invocations`,
+      credentialsArn: socketApi.credentialsArn
+    });
+
+    new ag2.CfnRoute(this, 'DisconnectRoute', {
+      routeKey: 'wave',
+      apiId: socketApi.ref,
+      target: `integrations/${waveIntegration.ref}`
     });
 
     // Stage
