@@ -5,18 +5,22 @@ const ddb = new AWS.DynamoDB.DocumentClient({
   region: process.env.AWS_REGION
 });
 
-exports.connect = async event => {
+function getItemParame(pathName, connectionId) {
   const encodedPathname = '';
-  const pageId = `page#${encodedPathname}`;
-  const connectionId = `connection#${event.requestContext.connectionId}`;
 
   const params = {
     TableName: process.env.TABLE_NAME,
     Item: {
-      pk: pageId,
-      sk: connectionId
+      pk: `page#${encodedPathname}`,
+      sk: `connection#${connectionId}`
     }
   };
+  
+  return params;
+}
+
+exports.connect = async event => {
+  const params = getItemParame('', event.requestContext.connectionId);
 
   try {
     await ddb.put(params).promise();
@@ -34,16 +38,7 @@ exports.connect = async event => {
 };
 
 exports.disconnect = async event => {
-  const encodedPathname = '';
-  const pageId = `page#${encodedPathname}`;
-  const connectionId = `connection#${event.requestContext.connectionId}`;
-  const params = {
-    TableName: process.env.TABLE_NAME,
-    Item: {
-      pk: pageId,
-      sk: connectionId
-    }
-  };
+  const params = getItemParame('', event.requestContext.connectionId);
 
   try {
     await ddb.delete(params).promise();
