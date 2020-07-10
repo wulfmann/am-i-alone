@@ -46,6 +46,11 @@ p {
 }
 
 .action {
+  border-radius: .25rem;
+  background-color: #ccc;
+  cursor: pointer;
+  padding: .5rem;
+
   .text {
     display: flex;
     align-items: center;
