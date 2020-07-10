@@ -1,36 +1,62 @@
-const WebSocket = require('ws');
+const AWS = require('aws-sdk');
 
-const DOMAIN = `wss://${process.env.API_ID}.execute-api.us-east-1.amazonaws.com/${process.env.STAGE}`;
-const ws = new WebSocket(DOMAIN);
+const ddb = new AWS.DynamoDB.DocumentClient({
+  apiVersion: '2012-08-10',
+  region: process.env.AWS_REGION
+});
 
-// ws.onopen((d) => {
-//   console.log(d, 'connected')
-// })
+exports.connect = async event => {
+  const encodedPathname = '';
+  const pageId = `page#${encodedPathname}`;
+  const connectionId = `connection#${event.requestContext.connectionId}`;
 
-// ws.onerror((e) => {
-//   console.log('error')
-//   console.log(e)
-// })
+  const params = {
+    TableName: process.env.TABLE_NAME,
+    Item: {
+      pk: pageId,
+      sk: connectionId
+    }
+  };
 
-// ws.onclose(()=>console.log('closed'))
-
-const connectHandler = (event, context) => {
-  console.log(event, ws);
-  return {
-    statusCode: 200
+  try {
+    await ddb.put(params).promise();
+  } catch (err) {
+    return {
+     statusCode: 500,
+     body: 'Failed to connect: ' + JSON.stringify(err);
+    };
   }
+
+  return {
+    statusCode: 200,
+    body: 'Connected.'
+  };
 };
 
-const disconnectHandler = (event, context) => {
-  console.log(event);
-  return {
-    statusCode: 200
+exports.disconnect = async event => {
+  const encodedPathname = '';
+  const pageId = `page#${encodedPathname}`;
+  const connectionId = `connection#${event.requestContext.connectionId}`;
+  const params = {
+    TableName: process.env.TABLE_NAME,
+    Item: {
+      pk: pageId,
+      sk: connectionId
+    }
+  };
+
+  try {
+    await ddb.delete(params).promise();
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: 'Failed to disconnect: ' + JSON.stringify(err);
+    };
   }
+
+  return {
+    statusCode: 200,
+    body: 'Disconnected.'
+  };
 };
 
-const getConnections = (event, context) => {
-  console.log(event);
-  return {
-    statusCode: 200
-  }
-};

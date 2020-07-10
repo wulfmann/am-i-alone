@@ -48,7 +48,7 @@ export class ConnectionApi extends cdk.Stack {
     
     const connectFn = new lambda.Function(this, 'ConnectFunction', {
       code: connectionHandlerCode,
-      handler: 'index.connectHandler',
+      handler: 'index.connect',
       runtime: lambda.Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: table.tableName,
@@ -72,7 +72,7 @@ export class ConnectionApi extends cdk.Stack {
 
     const disconnectFn = new lambda.Function(this, 'DisconnectFunction', {
       code: connectionHandlerCode,
-      handler: 'index.disconnectHandler',
+      handler: 'index.disconnect',
       runtime: lambda.Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: table.tableName,
