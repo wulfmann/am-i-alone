@@ -3,18 +3,18 @@
   "version": "0.0.1",
   "author": "Joe Snell<joepsnell@gmail.com",
   "dependencies": {
-    "aws-cdk": "latest",
-    "@aws-cdk/core": "latest",
-    "@aws-cdk/aws-apigateway": "latest",
-    "@aws-cdk/aws-apigatewayv2": "latest",
-    "@aws-cdk/aws-lambda": "latest",
-    "@aws-cdk/aws-dynamodb": "latest",
-    "@aws-cdk/aws-iam": "latest",
-    "@aws-cdk/aws-cloudfront": "latest",
-    "@aws-cdk/aws-s3": "latest"
+    "@aws-cdk/aws-apigateway": "^1.51.0",
+    "@aws-cdk/aws-apigatewayv2": "^1.51.0",
+    "@aws-cdk/aws-cloudfront": "^1.51.0",
+    "@aws-cdk/aws-dynamodb": "^1.51.0",
+    "@aws-cdk/aws-iam": "^1.51.0",
+    "@aws-cdk/aws-lambda": "^1.51.0",
+    "@aws-cdk/aws-s3": "^1.51.0",
+    "@aws-cdk/core": "^1.51.0",
+    "aws-cdk": "^1.51.0"
   },
   "devDependencies": {
-    "typescript": "latest",
-    "ts-node": "latest"
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.6"
   }
 }
