@@ -1,4 +1,5 @@
 // import { useAlone } from 'am-i-alone';
+import Head from 'next/head';
 
 function Home() {
   const { alone, count } = { alone: false, count: 1 };
@@ -8,6 +9,10 @@ function Home() {
   const text = alone ? 'yes' : 'no';
   
   return (
+    <>
+    <Head>
+      <title>Am I Alone?</title>
+    </Head>
     <div className="container">
       <div>
         <div className="main">
@@ -22,6 +27,7 @@ function Home() {
         )}
       </div>
     </div>
+    </>
   );
 };
 
