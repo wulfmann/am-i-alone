@@ -1,9 +1,10 @@
-import { useAlone } from 'am-i-alone';
+// import { useAlone } from 'am-i-alone';
 import Head from 'next/head';
 
 function Home() {
-  const { connected, tally, alone, wave } = useAlone(domain);
-  
+  // const { connected, tally, alone, wave } = useAlone(domain);
+  const count = 1;
+  const alone = false;
   const verb = count === 1 ? 'is' : 'are';
   const suffix = count === 1 ? '' : 's';
   const text = alone ? 'yes' : 'no';
