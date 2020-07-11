@@ -12,6 +12,7 @@ function Home() {
     <>
     <Head>
       <title>Am I Alone?</title>
+      <meta name="description">Am I Alone?</meta>
     </Head>
     <div className="container">
       <div>
