@@ -9,6 +9,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigatewayv2'
 import * as dynamo from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as nodeLambda from 'aws-cdk-lib/aws-lambda-nodejs';
 
 import { Construct } from 'constructs';
@@ -33,6 +34,31 @@ class Persistence extends cdk.Stack {
         name: 'sk'
       }
     });
+
+    // Monitoring
+    new cloudwatch.Alarm(this, 'ConsumedReadCapacityAlarm', {
+      metric: table.metricConsumedReadCapacityUnits(),
+      threshold: 4,
+      evaluationPeriods: 3,
+    });
+
+    new cloudwatch.Alarm(this, 'ConsumedWriteCapacityAlarm', {
+      metric: table.metricConsumedWriteCapacityUnits(),
+      threshold: 4,
+      evaluationPeriods: 3,
+    });
+
+    new cloudwatch.Alarm(this, 'QueryThrottledAlarm', {
+      metric: table.metricThrottledRequestsForOperation('Query'),
+      threshold: 1,
+      evaluationPeriods: 2,
+    });
+
+    new cloudwatch.Alarm(this, 'PutItemThrottledAlarm', {
+      metric: table.metricThrottledRequestsForOperation('PutItem'),
+      threshold: 1,
+      evaluationPeriods: 2,
+    });
   }
 }
 
@@ -50,138 +76,6 @@ class Compute extends cdk.Stack {
       routeSelectionExpression: "$request.body.action",
     });
 
-    // Functions
-    const environment = {
-      TABLE_NAME: name
-    }
-
-    const basePath = path.join(__dirname, 'functions');
-
-    const connectFunction = new nodeLambda.NodejsFunction(this, 'ConnectFunction', {
-      runtime: lambda.Runtime.NODEJS_16_X,
-      entry: path.join(basePath, 'connections.ts'),
-      memorySize: 1024,
-      handler: 'connect',
-      bundling: {
-        minify: true,
-        externalModules: ['aws-sdk'],
-      },
-      environment
-    });
-    table.grantReadWriteData(connectFunction)
-
-    const disconnectFunction = new nodeLambda.NodejsFunction(this, 'DisconnectFunction', {
-      runtime: lambda.Runtime.NODEJS_16_X,
-      entry: path.join(basePath, 'connections.ts'),
-      memorySize: 1024,
-      handler: 'disconnect',
-      bundling: {
-        minify: true,
-        externalModules: ['aws-sdk'],
-      },
-      environment
-    });
-    table.grantReadWriteData(disconnectFunction)
-
-    const getConnectionsFunction = new nodeLambda.NodejsFunction(this, 'GetConnectionsFunction', {
-      runtime: lambda.Runtime.NODEJS_16_X,
-      entry: path.join(basePath, 'connections.ts'),
-      memorySize: 1024,
-      handler: 'getConnectionCount',
-      bundling: {
-        minify: true,
-        externalModules: ['aws-sdk'],
-      },
-      environment
-    });
-    table.grantReadWriteData(getConnectionsFunction)
-
-    const messageFunction = new nodeLambda.NodejsFunction(this, 'MessageFunction', {
-      runtime: lambda.Runtime.NODEJS_16_X,
-      entry: path.join(basePath, 'connections.ts'),
-      memorySize: 1024,
-      handler: 'message',
-      bundling: {
-        minify: true,
-        externalModules: ['aws-sdk'],
-      },
-      environment
-    });
-    table.grantReadWriteData(messageFunction)
-
-    // API Gateway Permissions
-    const role = new iam.Role(this, `${name}-iam-role`, {
-      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com")
-    });
-
-    role.addToPolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      resources: [
-        connectFunction.functionArn,
-        disconnectFunction.functionArn,
-        getConnectionsFunction.functionArn,
-        messageFunction.functionArn
-      ],
-      actions: ["lambda:InvokeFunction"]
-    }));
-
-    // API Routes
-    const connectIntegration = new apigateway.CfnIntegration(this, "ApiIntegration-Connect", {
-      apiId: api.ref,
-      integrationType: "AWS_PROXY",
-      integrationUri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${connectFunction.functionArn}/invocations`,
-      credentialsArn: role.roleArn,
-    });
-
-    const disconnectIntegration = new apigateway.CfnIntegration(this, "ApiIntegration-Disconnect", {
-      apiId: api.ref,
-      integrationType: "AWS_PROXY",
-      integrationUri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${disconnectFunction.functionArn}/invocations`,
-      credentialsArn: role.roleArn
-    })
-
-    const getConnectionsIntegration = new apigateway.CfnIntegration(this, "ApiIntegration-GetConnections", {
-      apiId: api.ref,
-      integrationType: "AWS_PROXY",
-      integrationUri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${getConnectionsFunction.functionArn}/invocations`,
-      credentialsArn: role.roleArn
-    })
-
-    const messageFunctionIntegration = new apigateway.CfnIntegration(this, "ApiIntegration-Message", {
-      apiId: api.ref,
-      integrationType: "AWS_PROXY",
-      integrationUri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${messageFunction.functionArn}/invocations`,
-      credentialsArn: role.roleArn
-    })
-
-    const connectRoute = new apigateway.CfnRoute(this, "ApiRoute-Connect", {
-      apiId: api.ref,
-      routeKey: "$connect",
-      authorizationType: "NONE",
-      target: `integrations/${connectIntegration.ref}`
-    });
-
-    const disconnectRoute = new apigateway.CfnRoute(this, "ApiRoute-Disconnect", {
-      apiId: api.ref,
-      routeKey: "$disconnect",
-      authorizationType: "NONE",
-      target: `integrations/${disconnectIntegration.ref}`
-    });
-
-    const getConnectionsRoute = new apigateway.CfnRoute(this, "ApiRoute-GetConnections", {
-      apiId: api.ref,
-      routeKey: "getConnections",
-      authorizationType: "NONE",
-      target: `integrations/${getConnectionsIntegration.ref}`
-    });
-
-    const messageFunctionRoute = new apigateway.CfnRoute(this, "ApiRoute-Message", {
-      apiId: api.ref,
-      routeKey: "message",
-      authorizationType: "NONE",
-      target: `integrations/${messageFunctionIntegration.ref}`
-    });
-
     const deployment = new apigateway.CfnDeployment(this, `ApiDeployment`, {
       apiId: api.ref
     });
@@ -194,23 +88,91 @@ class Compute extends cdk.Stack {
       stageName
     });
 
-    deployment.node.addDependency(connectRoute)
-    deployment.node.addDependency(disconnectRoute)
-    deployment.node.addDependency(getConnectionsRoute)
-    deployment.node.addDependency(messageFunctionRoute)
+    const role = new iam.Role(this, `${name}-api-role`, {
+      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com")
+    });
 
-    // Lambda Permissions
-    // arn:aws:execute-api:us-east-1:********8602:55f7qip0yf/production/POST/@connections/{connectionId}
     const managementArn = `arn:${this.partition}:execute-api:${this.region}:${this.account}:${api.ref}/${stageName}/POST/@connections/*`;
     const manageApiPolicy = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       resources: [managementArn],
       actions: ['execute-api:ManageConnections']
     })
-    connectFunction.addToRolePolicy(manageApiPolicy)
-    disconnectFunction.addToRolePolicy(manageApiPolicy)
-    getConnectionsFunction.addToRolePolicy(manageApiPolicy)
-    messageFunction.addToRolePolicy(manageApiPolicy)
+
+    // Functions
+    const environment = {
+      TABLE_NAME: name
+    }
+
+    const basePath = path.join(__dirname, 'functions');
+
+    const functions: {[key: string]: { handler: string, routeKey: string }} = {
+      Connect: {
+        handler: 'connect',
+        routeKey: '$connect'
+      },
+      Disconnect: {
+        handler: 'disconnect',
+        routeKey: '$disconnect'
+      },
+      GetConnections: {
+        handler: 'getConnectionCount',
+        routeKey: 'getConnections'
+      },
+      Message: {
+        handler: 'message',
+        routeKey: 'message'
+      }
+    }
+
+    const functionArns = [];
+    for (const functionName in functions) {
+      const fn = new nodeLambda.NodejsFunction(this, `${functionName}Function`, {
+        runtime: lambda.Runtime.NODEJS_16_X,
+        entry: path.join(basePath, 'connections.ts'),
+        memorySize: 1024,
+        handler: functions[functionName].handler,
+        bundling: {
+          minify: true,
+          externalModules: ['aws-sdk'],
+        },
+        environment
+      });
+
+      table.grantReadWriteData(fn);
+      functionArns.push(fn.functionArn)
+
+      fn.addToRolePolicy(manageApiPolicy)
+
+      // Monitoring
+      new cloudwatch.Alarm(this, `${functionName}FunctionErrorsAlarm`, {
+        metric: fn.metricErrors(),
+        threshold: 5,
+        evaluationPeriods: 3,
+      });
+
+      const integration = new apigateway.CfnIntegration(this, `ApiIntegration-${functionName}`, {
+        apiId: api.ref,
+        integrationType: "AWS_PROXY",
+        integrationUri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${fn.functionArn}/invocations`,
+        credentialsArn: role.roleArn,
+      });
+
+      const route = new apigateway.CfnRoute(this, `ApiRoute-${functionName}`, {
+        apiId: api.ref,
+        routeKey: functions[functionName].routeKey,
+        authorizationType: "NONE",
+        target: `integrations/${integration.ref}`
+      });
+
+      deployment.node.addDependency(route)
+    }
+
+    role.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      resources: functionArns,
+      actions: ["lambda:InvokeFunction"]
+    }));
   }
 }
 
