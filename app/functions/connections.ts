@@ -188,7 +188,12 @@ export async function message(event) {
         console.log(`Found connections: ${connections}`)
 
         // send connection update to all connections
-        const message = Object.assign({ from: connectionId }, { ...JSON.parse(event.body) })
+        const messageBody = JSON.parse(event.body);
+        if (!('data' in messageBody)) {
+            throw new Error(`received invalid message body: ${messageBody}`)
+        }
+
+        const message = Object.assign({ from: connectionId }, { ...messageBody.data })
         await sendMessageToConnections(connections, message)
 
         return { statusCode: 200, body: 'success' };

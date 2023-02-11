@@ -49,10 +49,18 @@
             width: 100%;
         }
 
-        #connecting {
+        #notifications {
             position: absolute;
             bottom: 1rem;
             right: 1rem;
+        }
+
+        button {
+            padding: 0.25rem;
+            outline: none;
+            border: 0;
+            color: '#000';
+            display: inline-block;
         }
 
         #reconnect {
@@ -72,42 +80,65 @@
             <h2 id="title">Yes</h2>
             <p id="connectionCount"></p>
 
-            <button id="hello">say hello</button>
+            <button id="hello">say hi</button>
             <button id="reconnect">reconnect</button>
         </div>
 
-        <div id="connecting">
-            
-        </div>
+        <div id="notifications"></div>
     </div>
 
     <script>
+        function toggleButton(id, show=true) {
+            const el = document.getElementById(id)
+            if (!el) {
+                console.log(`button did not exist: #${id}`)
+                return
+            }
+
+            const display = show ? 'inline-block' : 'none';
+            el.style.display = display
+        }
+
         function showReconnect() {
-            document.getElementById('reconnect').style.display = 'block'
+            toggleButton('reconnect', true)
         }
 
         function hideReconnect() {
-            document.getElementById('reconnect').style.display = 'none'
+            toggleButton('reconnect', false)
         }
 
-        function updateConnecting(text="connecting...") {
-            document.getElementById('connecting').innerText = text
+        function showHello() {
+            toggleButton('hello', true)
+        }
+
+        function hideHello() {
+            toggleButton('hello', false)
+        }
+
+        let lastNotification = null;
+        function showNotification (text, timeout=3000) {
+            document.getElementById('notifications').innerText = text
+            const now = Date.now()
+            lastNotification = now;
+
+            setTimeout(() => {
+                if (lastNotification == now) {
+                    document.getElementById('notifications').innerText = ''
+                    lastNotification = null
+                }
+            }, timeout)
         }
 
         function disconnected() {
-            updateConnecting('disconnected')
+            showNotification('disconnected')
+            hideHello()
             showReconnect()
         }
 
         function setupHello(socket) {
             document.getElementById('hello').addEventListener('click', e => {
-                console.log(e)
                 socket.send(JSON.stringify({ action: 'message', data: { type: 'hi' } }))
             })
-        }
-
-        function showHi() {
-            document.getElementById('hello').style.display = 'block'
         }
 
         function updateText(connectionCount = 1) {
@@ -123,19 +154,20 @@
                 const be = withoutMe === 1 ? `is` : `are`;
                 const others = withoutMe === 1 ? `other` : `others`;
                 document.getElementById('connectionCount').innerText = `there ${be} ${withoutMe} ${others}`
-                showHi()
+                showHello()
             } else {
                 document.getElementById('connectionCount').innerText = ''
             }
         }
 
         function setupWebsocket(endpoint="wss://55f7qip0yf.execute-api.us-east-1.amazonaws.com/production") {
+            console.log(`connecting to socket: ${endpoint}`)
             const socket = new WebSocket(endpoint);
             
             socket.onopen = (e) => {
                 console.log('successfully connected to websocket. listening for updates...')
                 socket.send(JSON.stringify({ action: 'getConnections', data: '' }))
-                updateConnecting('')
+                showNotification('connected!')
                 hideReconnect()
             }
 
@@ -143,7 +175,7 @@
                 try {
                     const message = JSON.parse(e.data);
 
-                    if (!message.type) {
+                    if (!('type' in message)) {
                         console.log(`received invalid message: ${e.data}`)
                         return
                     }
@@ -158,22 +190,9 @@
                             updateText(body.connectionCount)
                             break
                         }
-                        case 'message': {
-                            const body = message.body
-                            if (!('type' in body)) {
-                                console.log(`received invalid message: ${JSON.stringify(body)}`)
-                                return
-                            }
-
-                            switch (body.type) {
-                                case 'hi': {
-                                    console.log('hi!')
-                                    break
-                                }
-                                default: {
-                                    console.log(`received an unknown message type: ${body}`)
-                                }
-                            }
+                        case 'hi': {
+                            showNotification('hi!')
+                            break
                         }
                         default: {
                             console.log(`received unexpected message type: ${e.data}`)
@@ -185,7 +204,7 @@
             }
 
             socket.onerror = (e) => {
-                updateConnecting('error occurred')
+                showNotification('error occurred')
                 console.log('encountered error in websocket: ', e)
             }
 
@@ -205,7 +224,7 @@
 
         // Initial Load
         updateText()
-        updateConnecting()
+        showNotification('connecting...')
 
         setupReconnect(setupWebsocket)
 
