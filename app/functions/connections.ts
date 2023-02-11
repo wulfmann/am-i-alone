@@ -174,3 +174,26 @@ export async function getConnectionCount(event) {
         return { statusCode: 500, body: e.stack };
     }
 };
+
+export async function message(event) {
+    try {
+        console.log(event)
+        const connectionId = event.requestContext.connectionId;
+        console.log(`fetching all connections...`)
+
+        setup(event)
+
+        // get all connections excluding this one
+        const connections = await getConnections([connectionId]);
+        console.log(`Found connections: ${connections}`)
+
+        // send connection update to all connections
+        const message = Object.assign({ from: connectionId }, { ...JSON.parse(event.body) })
+        await sendMessageToConnections(connections, message)
+
+        return { statusCode: 200, body: 'success' };
+    } catch (e) {
+        console.log(e)
+        return { statusCode: 500, body: e.stack };
+    }
+};

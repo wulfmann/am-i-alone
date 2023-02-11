@@ -96,6 +96,19 @@ class Compute extends cdk.Stack {
     });
     table.grantReadWriteData(getConnectionsFunction)
 
+    const messageFunction = new nodeLambda.NodejsFunction(this, 'MessageFunction', {
+      runtime: lambda.Runtime.NODEJS_16_X,
+      entry: path.join(basePath, 'connections.ts'),
+      memorySize: 1024,
+      handler: 'message',
+      bundling: {
+        minify: true,
+        externalModules: ['aws-sdk'],
+      },
+      environment
+    });
+    table.grantReadWriteData(messageFunction)
+
     // API Gateway Permissions
     const role = new iam.Role(this, `${name}-iam-role`, {
       assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com")
@@ -106,7 +119,8 @@ class Compute extends cdk.Stack {
       resources: [
         connectFunction.functionArn,
         disconnectFunction.functionArn,
-        getConnectionsFunction.functionArn
+        getConnectionsFunction.functionArn,
+        messageFunction.functionArn
       ],
       actions: ["lambda:InvokeFunction"]
     }));
@@ -133,6 +147,13 @@ class Compute extends cdk.Stack {
       credentialsArn: role.roleArn
     })
 
+    const messageFunctionIntegration = new apigateway.CfnIntegration(this, "ApiIntegration-Message", {
+      apiId: api.ref,
+      integrationType: "AWS_PROXY",
+      integrationUri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${messageFunction.functionArn}/invocations`,
+      credentialsArn: role.roleArn
+    })
+
     const connectRoute = new apigateway.CfnRoute(this, "ApiRoute-Connect", {
       apiId: api.ref,
       routeKey: "$connect",
@@ -154,6 +175,13 @@ class Compute extends cdk.Stack {
       target: `integrations/${getConnectionsIntegration.ref}`
     });
 
+    const messageFunctionRoute = new apigateway.CfnRoute(this, "ApiRoute-Message", {
+      apiId: api.ref,
+      routeKey: "message",
+      authorizationType: "NONE",
+      target: `integrations/${messageFunctionIntegration.ref}`
+    });
+
     const deployment = new apigateway.CfnDeployment(this, `ApiDeployment`, {
       apiId: api.ref
     });
@@ -169,6 +197,7 @@ class Compute extends cdk.Stack {
     deployment.node.addDependency(connectRoute)
     deployment.node.addDependency(disconnectRoute)
     deployment.node.addDependency(getConnectionsRoute)
+    deployment.node.addDependency(messageFunctionRoute)
 
     // Lambda Permissions
     // arn:aws:execute-api:us-east-1:********8602:55f7qip0yf/production/POST/@connections/{connectionId}
@@ -181,6 +210,7 @@ class Compute extends cdk.Stack {
     connectFunction.addToRolePolicy(manageApiPolicy)
     disconnectFunction.addToRolePolicy(manageApiPolicy)
     getConnectionsFunction.addToRolePolicy(manageApiPolicy)
+    messageFunction.addToRolePolicy(manageApiPolicy)
   }
 }
 

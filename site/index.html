@@ -54,6 +54,14 @@
             bottom: 1rem;
             right: 1rem;
         }
+
+        #reconnect {
+            display: none;
+        }
+
+        #hello {
+            display: none;
+        }
     </style>
 </head>
 
@@ -63,14 +71,43 @@
             <p>am i alone?</p>
             <h2 id="title">Yes</h2>
             <p id="connectionCount"></p>
+
+            <button id="hello">say hello</button>
+            <button id="reconnect">reconnect</button>
         </div>
 
-        <div id="connecting"></div>
+        <div id="connecting">
+            
+        </div>
     </div>
 
     <script>
+        function showReconnect() {
+            document.getElementById('reconnect').style.display = 'block'
+        }
+
+        function hideReconnect() {
+            document.getElementById('reconnect').style.display = 'none'
+        }
+
         function updateConnecting(text="connecting...") {
             document.getElementById('connecting').innerText = text
+        }
+
+        function disconnected() {
+            updateConnecting('disconnected')
+            showReconnect()
+        }
+
+        function setupHello(socket) {
+            document.getElementById('hello').addEventListener('click', e => {
+                console.log(e)
+                socket.send(JSON.stringify({ action: 'message', data: { type: 'hi' } }))
+            })
+        }
+
+        function showHi() {
+            document.getElementById('hello').style.display = 'block'
         }
 
         function updateText(connectionCount = 1) {
@@ -86,18 +123,20 @@
                 const be = withoutMe === 1 ? `is` : `are`;
                 const others = withoutMe === 1 ? `other` : `others`;
                 document.getElementById('connectionCount').innerText = `there ${be} ${withoutMe} ${others}`
+                showHi()
             } else {
                 document.getElementById('connectionCount').innerText = ''
             }
         }
 
-        function setup(endpoint="wss://55f7qip0yf.execute-api.us-east-1.amazonaws.com/production") {
+        function setupWebsocket(endpoint="wss://55f7qip0yf.execute-api.us-east-1.amazonaws.com/production") {
             const socket = new WebSocket(endpoint);
             
             socket.onopen = (e) => {
                 console.log('successfully connected to websocket. listening for updates...')
                 socket.send(JSON.stringify({ action: 'getConnections', data: '' }))
                 updateConnecting('')
+                hideReconnect()
             }
 
             socket.onmessage = (e) => {
@@ -119,6 +158,23 @@
                             updateText(body.connectionCount)
                             break
                         }
+                        case 'message': {
+                            const body = message.body
+                            if (!('type' in body)) {
+                                console.log(`received invalid message: ${JSON.stringify(body)}`)
+                                return
+                            }
+
+                            switch (body.type) {
+                                case 'hi': {
+                                    console.log('hi!')
+                                    break
+                                }
+                                default: {
+                                    console.log(`received an unknown message type: ${body}`)
+                                }
+                            }
+                        }
                         default: {
                             console.log(`received unexpected message type: ${e.data}`)
                         }
@@ -134,15 +190,28 @@
             }
 
             socket.onclose = (e) => {
-                updateConnecting('disconnected')
+                disconnected('disconnected')
                 console.log('disconnected from websocket')
             }
+
+            return socket
+        }
+
+        function setupReconnect(fn) {
+            document.getElementById('reconnect').addEventListener('click', e => {
+                fn()
+            })
         }
 
         // Initial Load
         updateText()
         updateConnecting()
-        setup()
+
+        setupReconnect(setupWebsocket)
+
+        const socket = setupWebsocket();
+
+        setupHello(socket)
     </script>
 </body>
 
