@@ -74,7 +74,6 @@
         }
 
         function updateText(connectionCount = 1) {
-            console.log(`updating text: ${connectionCount}`);
             const singular = connectionCount === 1;
 
             // Set Title
@@ -130,10 +129,12 @@
             }
 
             socket.onerror = (e) => {
+                updateConnecting('error occurred')
                 console.log('encountered error in websocket: ', e)
             }
 
             socket.onclose = (e) => {
+                updateConnecting('disconnected')
                 console.log('disconnected from websocket')
             }
         }
