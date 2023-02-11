@@ -8,17 +8,8 @@
 
     <style>
         :root {
-            --foreground: #121212;
-            --background: #ffffff;
-            --accent-1: #f5f5f5;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --foreground: #ffffff;
-                --background: #121212;
-                --accent-1: #303030;
-            }
+            --foreground: #ffffff;
+            --background: #121212;
         }
 
         * {
@@ -56,11 +47,13 @@
         }
 
         button {
+            margin-top: 0.5rem;
             padding: 0.25rem;
             outline: none;
             border: 0;
             color: '#000';
             display: inline-block;
+            color: '#000';
         }
 
         #reconnect {
@@ -156,8 +149,34 @@
                 document.getElementById('connectionCount').innerText = `there ${be} ${withoutMe} ${others}`
                 showHello()
             } else {
+                hideHello()
                 document.getElementById('connectionCount').innerText = ''
             }
+        }
+
+        function getPoint(a1, a2, d) {
+            // find a color d% between a1 and a2
+            return a1.map((p, i) => Math.floor(a1[i] + d * (a2[i] - a1[i])))
+        }
+
+        function updateTheme(connectionCount = 1) {
+            const withoutMe = connectionCount - 1;
+            const alone = withoutMe === 0;
+
+            const sections = {
+                0: [[18,18,18], [65,105,255]],
+            }
+            const threshold = 100;
+            const section = Math.floor(connectionCount / threshold);
+            if (!(section in sections)) {
+                console.log(`unable to calculate next color for connection count: ${connectionCount}`)
+                return
+            }
+            const [start, end] = sections[section]
+
+            const rgb = getPoint(start, end, withoutMe / threshold);
+            // console.log(`start: ${start}, end: ${end}, rgb: ${rgb}`)
+            document.documentElement.style.setProperty('--background', `rgb(${rgb.join(',')})`);
         }
 
         function setupWebsocket(endpoint="wss://55f7qip0yf.execute-api.us-east-1.amazonaws.com/production") {
@@ -188,6 +207,7 @@
                                 return
                             }
                             updateText(body.connectionCount)
+                            updateTheme(body.connectionCount)
                             break
                         }
                         case 'hi': {
@@ -231,6 +251,13 @@
         const socket = setupWebsocket();
 
         setupHello(socket)
+
+        // let count = 1;
+        // setInterval(() => {
+        //     count++
+        //     showNotification(`${count} people`)
+        //     updateTheme(count)
+        // }, 250)
     </script>
 </body>
 
