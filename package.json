@@ -1,0 +1,32 @@
+{
+  "name": "am-i-alone",
+  "version": "1.0.0",
+  "description": "This project is heavily inspired by [turven](https://turven.xyz).",
+  "main": "index.js",
+  "scripts": {
+    "site": "live-server site",
+    "cdk": "cdk",
+    "deploy": "cdk deploy --all",
+    "deploy:hot": "cdk deploy am-i-alone-compute --hotswap"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wulfmann/am-i-alone.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wulfmann/am-i-alone/issues"
+  },
+  "homepage": "https://github.com/wulfmann/am-i-alone#readme",
+  "devDependencies": {
+    "aws-cdk": "*",
+    "esbuild": "^0.17.7",
+    "live-server": "^1.2.2",
+    "serve": "^14.2.0",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.64.0"
+  }
+}

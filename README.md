@@ -1,31 +1,29 @@
 # Am I Alone?
 
-This project is heavily inspired by [turven](https://turven.xyz).
+### Background
 
-> Ever wondered if you're the only person in the whole world reading a web page?
+This project is inspired by [turven](https://turven.xyz).
 
-> Chances are, in a wonderful moment of serendipity, there may be another soul, somewhere on this planet, also reading the same page as you are, at the very same moment.
+## Development
 
-> [Maxime Vaillancourt](https://maximevaillancourt.com)
+This project is composed of a frontend and a backend. The front end is a single HTML file with minimal styles / scripts. It can be found in `site/index.html`. The backend is an AWS websocket api gateway with three lambdas. The handler code can be found in `app/functions/connections.ts`. The infrastructure is deployed via CDK and the stack can be found in `app/index.ts`.
 
-## Quickstart
+### Install Dependencies
 
-## Overview
+```
+npm install
+```
 
-This project is broken up into three parts:
+### Run Locally
 
-* [Package](#package)
-* [Infrastructure](#infrastructure)
-* [Site](#site)
+To run the frontend:
 
-### <a id="package"></a> Package
+```
+npm run site
+```
 
-The [package directory](https://github.com/wulfmann/am-i-alone/blob/master/package) contains the source code for the [NPM package]() that clients use to connect to the am-i-alone API.
+To deploy the backend:
 
-### <a id="infrastructure"></a> Infrastructure
-
-The [infrastructure directory](https://github.com/wulfmann/am-i-alone/blob/master/infrastructure) contains the source code for the AWS infrastructure of the backend. It is a [CDK App](https://aws.amazon.com/cdk/) that deploys into an AWS account. You can read more in [it's readme](https://github.com/wulfmann/am-i-alone/blob/master/infrastructure/README.md).
-
-### <a id="site"></a> Site
-
-The [site directory](https://github.com/wulfmann/am-i-alone/blob/master/site) contains the source code for the [demo site](https://amialone.snell.im). You can reference this to see a working example to implement on your own site.
+```
+npm run deploy
+```

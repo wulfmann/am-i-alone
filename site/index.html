@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Am I Alone?</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --foreground: #121212;
+            --background: #ffffff;
+            --accent-1: #f5f5f5;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --foreground: #ffffff;
+                --background: #121212;
+                --accent-1: #303030;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Avenir', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+        }
+
+        .container {
+            text-align: center;
+            min-height: 100vh;
+            width: 100vw;
+            min-height: -webkit-fill-available;
+            display: grid;
+            place-items: center;
+            width: 100%;
+        }
+
+        #connecting {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div>
+            <p>am i alone?</p>
+            <h2 id="title">Yes</h2>
+            <p id="connectionCount"></p>
+        </div>
+
+        <div id="connecting"></div>
+    </div>
+
+    <script>
+        function updateConnecting(text="connecting...") {
+            document.getElementById('connecting').innerText = text
+        }
+
+        function updateText(connectionCount = 1) {
+            console.log(`updating text: ${connectionCount}`);
+            const singular = connectionCount === 1;
+
+            // Set Title
+            const title = singular ? 'Yes' : 'No';
+            document.getElementById('title').innerText = title;
+            
+            // Set Subheading
+            if (connectionCount > 1) {
+                const withoutMe = connectionCount - 1;
+                const be = withoutMe === 1 ? `is` : `are`;
+                const others = withoutMe === 1 ? `other` : `others`;
+                document.getElementById('connectionCount').innerText = `there ${be} ${withoutMe} ${others}`
+            } else {
+                document.getElementById('connectionCount').innerText = ''
+            }
+        }
+
+        function setup(endpoint="wss://55f7qip0yf.execute-api.us-east-1.amazonaws.com/production") {
+            const socket = new WebSocket(endpoint);
+            
+            socket.onopen = (e) => {
+                console.log('successfully connected to websocket. listening for updates...')
+                socket.send(JSON.stringify({ action: 'getConnections', data: '' }))
+                updateConnecting('')
+            }
+
+            socket.onmessage = (e) => {
+                try {
+                    const message = JSON.parse(e.data);
+
+                    if (!message.type) {
+                        console.log(`received invalid message: ${e.data}`)
+                        return
+                    }
+
+                    switch (message.type) {
+                        case 'connection': {
+                            const body = message.body
+                            if (!('connectionCount' in body)) {
+                                console.log(`received invalid connection message: ${JSON.stringify(body)}`)
+                                return
+                            }
+                            updateText(body.connectionCount)
+                            break
+                        }
+                        default: {
+                            console.log(`received unexpected message type: ${e.data}`)
+                        }
+                    }
+                } catch (e) {
+                    console.log('failed to process socket message', e)
+                }
+            }
+
+            socket.onerror = (e) => {
+                console.log('encountered error in websocket: ', e)
+            }
+
+            socket.onclose = (e) => {
+                console.log('disconnected from websocket')
+            }
+        }
+
+        // Initial Load
+        updateText()
+        updateLoading()
+        setup()
+    </script>
+</body>
+
+</html>
