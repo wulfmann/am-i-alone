@@ -6,7 +6,7 @@
 
 ## Development
 
-This project is composed of a frontend and a backend. The front end is a single HTML file with minimal styles / scripts. It can be found in `site/index.html`. The backend is an AWS websocket api gateway with three lambdas. The handler code can be found in `app/functions/connections.ts`. The infrastructure is deployed via CDK and the stack can be found in `app/index.ts`.
+This project is composed of a frontend and a backend. The front end is a single HTML file with minimal styles / scripts. It can be found in `site/index.html`. The backend is an AWS websocket api gateway with four lambdas. The handler code can be found in `app/functions/connections.ts`. The infrastructure is deployed via CDK and the stack can be found in `app/index.ts`.
 
 ### Install Dependencies
 
