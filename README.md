@@ -1,8 +1,8 @@
 # Am I Alone?
 
-### Background
-
-This project is inspired by [turven](https://turven.xyz).
+>Loneliness is the child of plurality
+>
+> \- *Jacob "Julius Wellhausen" Snell*
 
 ## Development
 
